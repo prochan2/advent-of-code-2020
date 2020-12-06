@@ -16,10 +16,10 @@ foreach (var line in lines)
     {
         sum += group.Count;
         group.Clear();
+        continue;
     }
 
-    foreach (char c in line)
-        group.Add(c);
+    group.UnionWith(line.ToHashSet());
 }
 
 sum += group.Count;

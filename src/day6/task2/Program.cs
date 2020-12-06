@@ -25,10 +25,7 @@ foreach (var line in lines)
         continue;
     }
 
-    HashSet<char> person = new HashSet<char>();
-
-    foreach (char c in line)
-        person.Add(c);
+    HashSet<char> person = line.ToHashSet();
 
     if (@new)
     {
