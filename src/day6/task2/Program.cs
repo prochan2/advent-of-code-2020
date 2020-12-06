@@ -7,9 +7,10 @@ using static System.Console;
 
 var lines = File.ReadAllLines(@"..\..\..\..\input.txt");
 
-HashSet<char> group = new HashSet<char>();
+// This is less efficient than the previous implementation, but I wanted to try this way.
+var init = Enumerable.Range('a', 'z' - 'a' + 1).Select(i => (char)i).ToHashSet();
+var group = init.ToHashSet();
 int sum = 0;
-bool @new = true;
 
 foreach (var line in lines)
 {
@@ -20,22 +21,11 @@ foreach (var line in lines)
         WriteLine(group.Count);
 
         sum += group.Count;
-        group.Clear();
-        @new = true;
+        group = init.ToHashSet();
         continue;
     }
 
-    HashSet<char> person = line.ToHashSet();
-
-    if (@new)
-    {
-        group = person;
-        @new = false;
-    }
-    else
-    {
-        group.IntersectWith(person);
-    }
+    group.IntersectWith(line.ToHashSet());
 }
 
 sum += group.Count;

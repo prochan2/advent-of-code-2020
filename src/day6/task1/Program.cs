@@ -7,7 +7,7 @@ using static System.Console;
 
 var lines = File.ReadAllLines(@"..\..\..\..\input.txt");
 
-HashSet<char> group = new HashSet<char>();
+var group = new HashSet<char>();
 int sum = 0;
 
 foreach (var line in lines)
