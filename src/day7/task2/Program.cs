@@ -56,10 +56,10 @@ WriteLine("Answer:");
 
 long Count(string keyToCount)
 {
+    long result = 1;
+
     if (bags.TryGetValue(keyToCount, out var allowedContent))
     {
-        long result = 1;
-
         foreach (var nextToCount in allowedContent)
         {
             long nextCount = Count(nextToCount.Id);
@@ -67,11 +67,9 @@ long Count(string keyToCount)
 
             WriteLine($"{keyToCount}: {nextToCount} * {nextCount}");
         }
-
-        return result;
     }
 
-    return 1;
+    return result;
 }
 
 WriteLine(Count("shiny gold") - 1);
