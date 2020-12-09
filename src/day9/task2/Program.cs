@@ -16,44 +16,25 @@ var numbers = lines.Select(l => long.Parse(l)).ToArray();
 
 long answer1 = long.MinValue;
 
-for (int x = preambleLength; x < numbers.Length; x++)
+for (int i = preambleLength; i < numbers.Length; i++)
 {
-    if (!HasSum(x))
+    if (!HasSum(i))
     {
-        answer1 = numbers[x];
+        answer1 = numbers[i];
         break;
     }
 }
 
-int i;
-int j = -1;
+int first;
+int last = int.MinValue;
 
-for (i = 0; i < numbers.Length; i++)
+for (first = 0; first < numbers.Length; first++)
 {
-    var n1 = numbers[i];
-    long sum = n1;
-    bool found = false;
-
-    for (j = i + 1; j < numbers.Length; j++)
-    {
-        var n2 = numbers[j];
-        sum += n2;
-
-        if (sum > answer1)
-            break;
-
-        if (sum == answer1)
-        {
-            found = true;
-            break;
-        }
-    }
-
-    if (found)
+    if (TryFindSequence(answer1, first, out last))
         break;
 }
 
-var sortedSequence = numbers[i..(j + 1)];
+var sortedSequence = numbers[first..(last + 1)];
 Array.Sort(sortedSequence);
 
 var answer2 = sortedSequence[0];
@@ -70,15 +51,38 @@ bool HasSum(int i)
 
     for (int j = 0; j < preambleLength; j++)
     {
-        for (int k = 0; k < preambleLength; k++)
+        for (int k = j + 1; k < preambleLength; k++)
         {
-            if (j == k)
-                continue;
-
             if (numbers[i - j - 1] + numbers[i - k - 1] == n)
                 return true;
         }
     }
 
+    return false;
+}
+
+bool TryFindSequence(long expectedSum, int first, out int last)
+{
+    int i = first;
+
+    var n1 = numbers[i];
+    long sum = n1;
+
+    for (int j = i + 1; j < numbers.Length; j++)
+    {
+        var n2 = numbers[j];
+        sum += n2;
+
+        if (sum > expectedSum)
+            break;
+
+        if (sum == expectedSum)
+        {
+            last = j;
+            return true;
+        }
+    }
+
+    last = int.MinValue;
     return false;
 }
