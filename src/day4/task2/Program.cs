@@ -52,16 +52,12 @@ for (int lineNumber = 0; lineNumber < lines.Length; lineNumber++)
 
                     string unit = kv[1][^2..];
 
-                    switch (unit)
+                    switch ((value, unit))
                     {
-                        case "cm":
-                            if (value < 150 || value > 193)
-                                continue;
+                        case (>= 150 and <= 193, "cm"):
                             break;
 
-                        case "in":
-                            if (value < 59 || value > 76)
-                                continue;
+                        case (>= 59 and <= 76, "in"):
                             break;
 
                         default:
