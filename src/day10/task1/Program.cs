@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using static System.Console;
 
-string fileName = @"..\..\..\..\sinput1.txt";
-//string fileName = @"..\..\..\..\input.txt";
+//string fileName = @"..\..\..\..\sinput1.txt";
+string fileName = @"..\..\..\..\input.txt";
 var joltageDifferences = new long[] { 1, 2, 3 };
 
 var lines = File.ReadAllLines(fileName);
@@ -15,41 +15,49 @@ var adapters = lines.Select(l => long.Parse(l)).ToHashSet();
 if (adapters.Count != lines.Length)
     throw new NotImplementedException();
 
-var emptyDistributions = joltageDifferences.ToDictionary(d => d, d => 0L);
-
 foreach (var adapter in adapters)
 {
     var remainingAdapters = adapters.ToHashSet();
     remainingAdapters.Remove(adapter);    
 
-    var answer = GetDistributions(adapter, remainingAdapters, emptyDistributions);
+    var usedAdapters = GetDistributions(adapter, remainingAdapters);
 
-    if (answer != (null, null))
+    if (usedAdapters != null)
     {
-        answer.Item1.Add(adapter);
-        answer.Item2[3]++; // internal adapter
+        usedAdapters.Add(adapter);
+        usedAdapters.Reverse();
 
-        answer.Item1.Reverse();
+        var previousAdapter = 0L;
+        var distributions = joltageDifferences.ToDictionary(d => d, d => 0L);
 
         WriteLine("Used adapters:");
-        foreach (var usedAdapter in answer.Item1)
+        foreach (var usedAdapter in usedAdapters)
         {
             WriteLine(usedAdapter);
+            distributions[usedAdapter - previousAdapter]++;
+            previousAdapter = usedAdapter;
         }
+
+        distributions[3]++; // internal adapter
 
         WriteLine();
         WriteLine("Joltage distributions:");
-        foreach (var kv in answer.Item2)
+        foreach (var kv in distributions)
         {
             WriteLine($"{kv.Key} {kv.Value}");
         }
+
+        WriteLine();
+        WriteLine("Answer:");
+        WriteLine(distributions[1] * distributions[3]);
+
         return;
     }
 }
 
 WriteLine("Not found.");
 
-(List<long>, Dictionary<long, long>) GetDistributions(long currentAdapter, HashSet<long> remainingAdapters, Dictionary<long, long> currentDistributions)
+List<long> GetDistributions(long currentAdapter, HashSet<long> remainingAdapters)
 {
     foreach (var joltageDifference in joltageDifferences)
     {
@@ -61,23 +69,21 @@ WriteLine("Not found.");
         var nextRemainingAdapters = remainingAdapters.ToHashSet();
         nextRemainingAdapters.Remove(nextAdapter);
 
-        var nextCurrentDistributions = currentDistributions.ToDictionary(kv => kv.Key, kv => kv.Value);
-        nextCurrentDistributions[joltageDifference]++;
 
         if (nextRemainingAdapters.Count == 0)
         {
-            return (new List<long> { nextAdapter }, nextCurrentDistributions);
+            return new List<long> { nextAdapter };
         }
 
-        var result = GetDistributions(nextAdapter, nextRemainingAdapters, nextCurrentDistributions);
+        var result = GetDistributions(nextAdapter, nextRemainingAdapters);
 
-        if (result != (null, null))
+        if (result != null)
         {
-            result.Item1.Add(nextAdapter);
+            result.Add(nextAdapter);
             return result;
         }
     }
 
-    return (null, null);
+    return null;
 }
 
