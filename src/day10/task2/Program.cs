@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using static System.Console;
 
-//string fileName = @"..\..\..\..\sinput1.txt";
-string fileName = @"..\..\..\..\input.txt";
+string fileName = @"..\..\..\..\sinput1.txt";
+//string fileName = @"..\..\..\..\input.txt";
 var joltageDifferences = new HashSet<long> { 1, 2, 3 };
 
 var lines = File.ReadAllLines(fileName);
@@ -53,14 +53,30 @@ for (int i = 0; i < adapters.Count; i++)
 }
 
 path.Sort();
-var distinctPathsCount = 0L;
+var distinctWaysCount = 1L;
 
 for (int i = 0; i < path.Count; i++)
 {
-    distinctPathsCount += CountDistinctWays(i);
+    var currentJoltage = path[i];
+
+    for (int j = 1; j <= joltageDifferences.Count; j++)
+    {
+        var next = i + j;
+
+        if (next == path.Count)
+            break;
+
+        var nextJoltage = path[next];
+        var diff = nextJoltage - currentJoltage;
+
+        if (joltageDifferences.Contains(diff))
+        {
+            distinctWaysCount++;
+        }
+    }
 }
 
-WriteLine(distinctPathsCount);
+WriteLine(distinctWaysCount);
 
 List<long> FindPath(int currentIndex)
 {
@@ -93,32 +109,3 @@ List<long> FindPath(int currentIndex)
 
     return null;
 }
-
-long CountDistinctWays(int currentIndex)
-{
-    var currentJoltage = path[currentIndex];
-
-    if (currentIndex == path.Count - 1)
-        return 1;
-
-    var result = 0L;
-
-    for (int i = 1; i <= joltageDifferences.Count; i++)
-    {
-        var nextIndex = currentIndex + i;
-
-        if (nextIndex == path.Count)
-            return 0;
-
-        var nextJoltage = path[currentIndex + i];
-        var diff = nextJoltage - currentJoltage;
-
-        if (!joltageDifferences.Contains(diff))
-            continue;
-
-        result += CountDistinctWays(nextIndex);
-    }
-
-    return result;
-}
-
