@@ -7,31 +7,26 @@ using static System.Console;
 
 //string fileName = @"..\..\..\..\sinput1.txt";
 string fileName = @"..\..\..\..\input.txt";
-var joltageDifferences = new long[] { 1, 2, 3 };
+var joltageDifferences = new HashSet<long> { 1, 2, 3 };
 
 var lines = File.ReadAllLines(fileName);
-var adapters = lines.Select(l => long.Parse(l)).ToHashSet();
+var adapters = lines.Select(l => long.Parse(l)).ToList();
 
-if (adapters.Count != lines.Length)
-    throw new NotImplementedException();
+adapters.Sort();
 
-foreach (var adapter in adapters)
+for (int i = 0; i < adapters.Count; i++)
 {
-    var remainingAdapters = adapters.ToHashSet();
-    remainingAdapters.Remove(adapter);    
+    var path = FindPath(i);
 
-    var usedAdapters = GetDistributions(adapter, remainingAdapters);
-
-    if (usedAdapters != null)
+    if (path != null)
     {
-        usedAdapters.Add(adapter);
-        usedAdapters.Reverse();
+        path.Reverse();
 
         var previousAdapter = 0L;
         var distributions = joltageDifferences.ToDictionary(d => d, d => 0L);
 
         WriteLine("Used adapters:");
-        foreach (var usedAdapter in usedAdapters)
+        foreach (var usedAdapter in path)
         {
             WriteLine(usedAdapter);
             distributions[usedAdapter - previousAdapter]++;
@@ -57,29 +52,31 @@ foreach (var adapter in adapters)
 
 WriteLine("Not found.");
 
-List<long> GetDistributions(long currentAdapter, HashSet<long> remainingAdapters)
+List<long> FindPath(int currentIndex)
 {
-    foreach (var joltageDifference in joltageDifferences)
-    {
-        var nextAdapter = currentAdapter + joltageDifference;
+    var currentJoltage = adapters[currentIndex];
 
-        if (!remainingAdapters.Contains(nextAdapter))
+    if (currentIndex == adapters.Count - 1)
+        return new List<long> { currentJoltage };
+
+    for (int i = 1; i <= joltageDifferences.Count; i++)
+    {
+        var nextIndex = currentIndex + i;
+
+        if (nextIndex == adapters.Count)
+            return null;
+
+        var nextJoltage = adapters[currentIndex + i];
+        var diff = nextJoltage - currentJoltage;
+
+        if (!joltageDifferences.Contains(diff))
             continue;
 
-        var nextRemainingAdapters = remainingAdapters.ToHashSet();
-        nextRemainingAdapters.Remove(nextAdapter);
-
-
-        if (nextRemainingAdapters.Count == 0)
-        {
-            return new List<long> { nextAdapter };
-        }
-
-        var result = GetDistributions(nextAdapter, nextRemainingAdapters);
+        var result = FindPath(nextIndex);
 
         if (result != null)
         {
-            result.Add(nextAdapter);
+            result.Add(currentJoltage);
             return result;
         }
     }
