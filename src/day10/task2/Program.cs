@@ -8,7 +8,6 @@ using static System.Console;
 //string fileName = @"..\..\..\..\sinput1.txt";
 //string fileName = @"..\..\..\..\sinput2.txt";
 string fileName = @"..\..\..\..\input.txt";
-var joltageDifferences = new HashSet<long> { 1, 2, 3 };
 
 var adapters = File.ReadAllLines(fileName).Select(l => int.Parse(l)).ToList();
 adapters.Add(0);
