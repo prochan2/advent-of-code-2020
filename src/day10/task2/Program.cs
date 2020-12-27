@@ -5,107 +5,28 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using static System.Console;
 
-string fileName = @"..\..\..\..\sinput1.txt";
-//string fileName = @"..\..\..\..\input.txt";
+//string fileName = @"..\..\..\..\sinput1.txt";
+//string fileName = @"..\..\..\..\sinput2.txt";
+string fileName = @"..\..\..\..\input.txt";
 var joltageDifferences = new HashSet<long> { 1, 2, 3 };
 
-var lines = File.ReadAllLines(fileName);
-var adapters = lines.Select(l => long.Parse(l)).ToList();
-
+var adapters = File.ReadAllLines(fileName).Select(l => int.Parse(l)).ToList();
+adapters.Add(0);
 adapters.Sort();
+adapters.Add(adapters.Last() + 3);
 
-List<long> path = null;
+var counts = adapters.Select(a => 0L).ToArray();
+counts[0] = 1L;
 
 for (int i = 0; i < adapters.Count; i++)
 {
-    path = FindPath(i);
-
-    if (path != null)
+    for (int j = i + 1; j < adapters.Count; j++)
     {
-        path.Reverse();
-
-        var previousAdapter = 0L;
-        var distributions = joltageDifferences.ToDictionary(d => d, d => 0L);
-
-        WriteLine("Used adapters:");
-        foreach (var usedAdapter in path)
-        {
-            WriteLine(usedAdapter);
-            distributions[usedAdapter - previousAdapter]++;
-            previousAdapter = usedAdapter;
-        }
-
-        distributions[3]++; // internal adapter
-
-        WriteLine();
-        WriteLine("Joltage distributions:");
-        foreach (var kv in distributions)
-        {
-            WriteLine($"{kv.Key} {kv.Value}");
-        }
-
-        WriteLine();
-        WriteLine("Answer:");
-        WriteLine(distributions[1] * distributions[3]);
-
-        break;
-    }
-}
-
-path.Sort();
-var distinctWaysCount = 1L;
-
-for (int i = 0; i < path.Count; i++)
-{
-    var currentJoltage = path[i];
-
-    for (int j = 1; j <= joltageDifferences.Count; j++)
-    {
-        var next = i + j;
-
-        if (next == path.Count)
+        if (adapters[j] - adapters[i] <= 3)
+            counts[j] += counts[i];
+        else
             break;
-
-        var nextJoltage = path[next];
-        var diff = nextJoltage - currentJoltage;
-
-        if (joltageDifferences.Contains(diff))
-        {
-            distinctWaysCount++;
-        }
     }
 }
 
-WriteLine(distinctWaysCount);
-
-List<long> FindPath(int currentIndex)
-{
-    var currentJoltage = adapters[currentIndex];
-
-    if (currentIndex == adapters.Count - 1)
-        return new List<long> { currentJoltage };
-
-    for (int i = 1; i <= joltageDifferences.Count; i++)
-    {
-        var nextIndex = currentIndex + i;
-
-        if (nextIndex == adapters.Count)
-            return null;
-
-        var nextJoltage = adapters[currentIndex + i];
-        var diff = nextJoltage - currentJoltage;
-
-        if (!joltageDifferences.Contains(diff))
-            continue;
-
-        var result = FindPath(nextIndex);
-
-        if (result != null)
-        {
-            result.Add(currentJoltage);
-            return result;
-        }
-    }
-
-    return null;
-}
+WriteLine(counts.Last());
